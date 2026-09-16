@@ -1,0 +1,8 @@
+# The one file that must never travel: the database password.
+/lib/config.php
+/var/logs/*
+/var/ratelimit/*
+!/var/logs/.htaccess
+!/var/ratelimit/.htaccess
+/vendor/
+.DS_Store

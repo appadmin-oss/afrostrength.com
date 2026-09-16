@@ -1,0 +1,457 @@
+/*
+ * Afrotech Academy — early registration.
+ *
+ * One stylesheet, no build step, no framework. It carries the same tokens as
+ * the platform so the page a learner registers on today and the portal they
+ * sign into next month look like the same institution.
+ *
+ * Colours are hex rather than oklch: this page has to render on whatever
+ * browser a Lagos internet café has installed, and a token nobody can parse
+ * is a page with no colour at all.
+ */
+
+:root {
+  --page: #FFFFFF;
+  --cream: #FCFAF6;
+  --tint: #F8F7F5;
+  --hair: #F2F0EE;
+  --border: #E9E6E3;
+  --muted: #6F6660;      /* measured 5.61:1 on white — the platform's #7F7670 is 4.44 and fails */
+  --ink-soft: #4E463F;
+  --ink: #2D2620;
+  --red: #DE3719;
+  --red-deep: #B32E16;
+  --success: #2C7A52;
+  --selected: #FDEEEA;
+
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-10: 40px;
+  --s-12: 48px; --s-16: 64px;
+
+  --t-micro: 11px; --t-small: 12.5px; --t-body: 14px;
+  --t-read: 16px;  --t-lead: 18px;    --t-h3: 20px;
+  --t-h2: 24px;    --t-h1: 30px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+/*
+ * The academy's type. Three families, three jobs, and a real fallback stack
+ * behind each so a page that loads before the fonts do is still set correctly
+ * rather than in Times.
+ *
+ *   Archivo        headings and the wordmark — geometric, a little condensed
+ *   Instrument Sans body copy and interface
+ *   IBM Plex Mono  references, counts, timestamps — anything that is a value
+ *                  rather than a sentence
+ */
+:root {
+  --font-display: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-body: "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font: var(--t-read)/1.6 var(--font-body);
+  /* Tabular figures everywhere by default: a reference, a count or a
+     percentage that changes must not shift the text around it. */
+  font-variant-numeric: tabular-nums;
+}
+
+h1, h2, h3, legend, .wordmark, .progressNum, .refValue {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Uppercase micro-labels get positive tracking, or they set as a smudge. */
+.refLabel, .eyebrow, .navLabel {
+  letter-spacing: 0.1em;
+}
+
+/* Values, not sentences. */
+.refValue, .portalRef, .workWhen, .panelMeta {
+  font-family: var(--font-mono);
+}
+
+/* Visible focus on everything, always. */
+:focus-visible {
+  outline: 2px solid var(--red-deep);
+  outline-offset: 3px;
+}
+
+.skipLink {
+  position: absolute;
+  left: -9999px;
+  top: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  background: var(--ink);
+  color: #FFFFFF;
+  border-radius: 8px;
+  text-decoration: none;
+  z-index: 10;
+}
+.skipLink:focus { left: var(--s-4); }
+
+.srOnly {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Chrome ------------------------------------------------------------ */
+
+.masthead {
+  background: var(--ink);
+  color: #FFFFFF;
+  padding: var(--s-4) var(--s-5);
+}
+.mastheadRow {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+.mark {
+  flex: 0 0 auto;
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  /* red-deep, not red: white on --red measures 3.31:1 at this size and fails.
+     The deeper clay is 6.33:1 and is the same colour family. */
+  background: var(--red-deep);
+  border-radius: 9px;
+  font-family: var(--font-display);
+  font-size: var(--t-body);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #FFFFFF;
+}
+.wordmark { font-size: var(--t-lead); font-weight: 700; letter-spacing: -0.01em; }
+.parent { display: block; font-size: var(--t-small); color: #C8C0B8; }
+
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-5) var(--s-16);
+}
+
+h1 {
+  margin: 0 0 var(--s-3);
+  font-size: var(--t-h1);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+h2 {
+  margin: var(--s-10) 0 var(--s-4);
+  font-size: var(--t-h3);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+.lede {
+  margin: 0 0 var(--s-6);
+  font-size: var(--t-lead);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* The banner that says, plainly, that the full site is still being built. */
+.notice {
+  margin: 0 0 var(--s-8);
+  padding: var(--s-4) var(--s-5);
+  background: var(--selected);
+  border-left: 4px solid var(--red-deep);
+  border-radius: 0 10px 10px 0;
+  font-size: var(--t-read);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.notice strong { color: var(--ink); }
+
+/* ---- Form -------------------------------------------------------------- */
+
+form { margin: 0; }
+
+fieldset {
+  margin: 0 0 var(--s-8);
+  padding: 0;
+  border: 0;
+}
+legend {
+  padding: 0;
+  margin-bottom: var(--s-2);
+  font-size: var(--t-h3);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.legendNote {
+  margin: 0 0 var(--s-5);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.field { margin-bottom: var(--s-5); }
+
+label, .groupLabel {
+  display: block;
+  margin-bottom: var(--s-2);
+  font-size: var(--t-body);
+  font-weight: 600;
+  color: var(--ink);
+}
+.hint {
+  display: block;
+  margin: calc(var(--s-1) * -1) 0 var(--s-2);
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+/* url and search too. Leaving them out meant the "link to your work" field
+   kept the browser's 13px default, which makes iOS Safari zoom the page the
+   moment it is tapped — on the one form a learner fills in from a phone. */
+input[type="url"],
+input[type="search"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  min-height: 48px;
+  padding: var(--s-3) var(--s-4);
+  /* 16px exactly: anything smaller and iOS Safari zooms the page the moment
+     the field is tapped, which loses the person their place in the form. */
+  font-size: var(--t-read);
+  font-family: inherit;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  appearance: none;
+}
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%234E463F' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--s-4) center;
+  padding-right: var(--s-10);
+}
+input:focus, select:focus { border-color: var(--red-deep); }
+
+/* Choice cards — the whole card is the label, so the tap target is the card
+   and not the 16px circle inside it. */
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--s-3);
+}
+.choice {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  min-height: 56px;
+  padding: var(--s-4);
+  margin: 0;
+  font-weight: 400;
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+}
+/* 24px, not the browser's 13px default. The whole card is the target
+   because the label wraps the input, so this is belt and braces — but the
+   control a person actually aims at should clear the floor on its own. */
+.choice input { margin: 0; width: 24px; height: 24px; accent-color: var(--red-deep); flex: 0 0 auto; }
+.choice:hover { border-color: var(--ink-soft); }
+.choice:has(input:checked) {
+  background: var(--selected);
+  border-color: var(--red-deep);
+  box-shadow: inset 0 0 0 1px var(--red-deep);
+}
+.choice:has(input:focus-visible) { outline: 2px solid var(--red-deep); outline-offset: 2px; }
+.choiceMain { display: block; font-weight: 600; font-size: var(--t-read); color: var(--ink); }
+.choiceNote { display: block; margin-top: var(--s-1); font-size: var(--t-body); line-height: 1.5; color: var(--muted); }
+
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  background: var(--tint);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-weight: 400;
+  font-size: var(--t-body);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.consent input { margin: 0; width: 24px; height: 24px; accent-color: var(--red-deep); flex: 0 0 auto; }
+
+/* ---- Errors ------------------------------------------------------------ */
+
+.errorSummary {
+  margin: 0 0 var(--s-6);
+  padding: var(--s-5);
+  background: #FDF0ED;
+  border: 2px solid var(--red-deep);
+  border-radius: 12px;
+}
+.errorSummary h2 { margin: 0 0 var(--s-3); font-size: var(--t-lead); color: var(--red-deep); }
+.errorSummary ul { margin: 0; padding-left: var(--s-5); }
+.errorSummary li { margin-bottom: var(--s-2); font-size: var(--t-read); line-height: 1.5; }
+.errorSummary a { color: var(--red-deep); }
+
+.fieldError {
+  display: block;
+  margin-top: var(--s-2);
+  font-size: var(--t-body);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--red-deep);
+}
+/* The message carries the meaning; the border is the second signal, never
+   the only one. */
+.field:has(.fieldError) input,
+.field:has(.fieldError) select { border-color: var(--red-deep); border-width: 2px; }
+
+/* ---- Buttons ----------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 var(--s-8);
+  font-size: var(--t-read);
+  font-family: inherit;
+  font-weight: 700;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btnPrimary { background: var(--red-deep); color: #FFFFFF; }
+.btnPrimary:hover { background: #99270F; }
+.btnSecondary { background: var(--page); border-color: var(--border); color: var(--ink); }
+.btnSecondary:hover { border-color: var(--ink-soft); }
+.btnBlock { width: 100%; }
+
+.actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-6); }
+
+/* ---- Confirmation ------------------------------------------------------ */
+
+.refPanel {
+  margin: var(--s-6) 0;
+  padding: var(--s-5);
+  background: var(--tint);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.refLabel {
+  display: block;
+  font-size: var(--t-small);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.refValue {
+  display: block;
+  margin-top: var(--s-1);
+  font-size: var(--t-h2);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+ol.steps { margin: 0 0 var(--s-6); padding-left: var(--s-5); }
+ol.steps li { margin-bottom: var(--s-3); line-height: 1.65; color: var(--ink-soft); }
+
+.footer {
+  border-top: 1px solid var(--border);
+  padding: var(--s-8) var(--s-5) var(--s-12);
+  font-size: var(--t-body);
+  line-height: 1.7;
+  color: var(--muted);
+}
+.footerInner { max-width: 720px; margin: 0 auto; }
+.footer a { color: var(--ink-soft); }
+
+@media (max-width: 520px) {
+  .wrap { padding-top: var(--s-6); }
+  .actions .btn { width: 100%; }
+}
+
+/* ---- Masthead navigation -------------------------------------------------
+ *
+ * Added because the masthead had none. A visitor on the registration desk had
+ * no way to the help centre and a learner had no way back into their portal —
+ * both existed, and nothing on the page said so.
+ *
+ * Two links, always visible. No menu: there is nothing here worth hiding.
+ */
+
+.mastheadRow {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.mastheadBrand {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  color: inherit;
+  text-decoration: none;
+  min-height: 44px;
+}
+
+.mastheadBrand:hover .wordmark {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.mastheadNav {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+
+.mastheadLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: var(--t-body);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mastheadLink:hover,
+.mastheadLink:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+  color: #FFFFFF;
+}
+
+@media (max-width: 479px) {
+  .parent {
+    /* The sub-line goes before the links do: knowing where to click beats
+       knowing who owns the programme, and the footer says so anyway. */
+    display: none;
+  }
+}

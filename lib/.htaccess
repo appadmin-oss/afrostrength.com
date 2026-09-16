@@ -1,0 +1,19 @@
+# The second lock. lib/ holds config.php — the database password and the
+# mail password — so it repeats the parent's refusal rather than trusting
+# that the parent's file was uploaded, or that the host honours it.
+Options -Indexes
+<IfModule mod_authz_core.c>
+  <FilesMatch ".*">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+  <FilesMatch ".*">
+    Order allow,deny
+    Deny from all
+  </FilesMatch>
+</IfModule>
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^ - [F,L]
+</IfModule>

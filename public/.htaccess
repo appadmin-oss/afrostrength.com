@@ -1,0 +1,117 @@
+# ===============================================================
+# Afrotech Academy — early registration (Apache / cPanel)
+#
+# This file guards the ONE directory the web server should serve.
+# Everything else — lib/, vendor/, cron/, var/ — lives above it and
+# is unreachable over HTTP by construction, which is stronger than
+# any rule written here. The rules below are the second line.
+# ===============================================================
+
+DirectoryIndex index.php
+Options -Indexes
+AddDefaultCharset UTF-8
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=()"
+
+  # The page runs one inline script and loads one stylesheet from itself.
+  # Nothing else, so the policy can be strict rather than decorative.
+  Header always set Content-Security-Policy "default-src 'self'; \
+script-src 'self' 'unsafe-inline'; \
+style-src 'self'; \
+img-src 'self' data:; \
+font-src 'self'; \
+connect-src 'self'; \
+form-action 'self'; \
+frame-ancestors 'self'; \
+base-uri 'self'; \
+object-src 'none'"
+
+  # Turn on ONLY after HTTPS is confirmed working. Hard to undo.
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain application/javascript image/svg+xml
+</IfModule>
+
+# ---------------------------------------------------------------
+# Caching
+#
+# NextGenGen serves its CSS with a seven-day max-age and
+# must-revalidate, which is the right instinct — long cache, but the
+# browser checks before reusing. It leaves a gap that Cloudflare
+# widens: must-revalidate governs the BROWSER, and the edge happily
+# serves a stale copy for its own TTL, so a CSS fix reaches some
+# visitors and not others until somebody remembers to purge.
+#
+# So every asset URL carries ?v=<hash of mtime and size>, written by
+# asset() in lib/assets.php. A changed file has a URL nothing has
+# cached, and an old URL nobody references can sit at the edge
+# forever at no cost. That makes "immutable" honest rather than
+# optimistic, and it means a deploy needs no purge at all.
+# ---------------------------------------------------------------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css   "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  # The form itself must never be cached: a cached page carries a dead CSRF
+  # token and the person is told the form expired for no reason.
+  ExpiresByType text/html  "access plus 0 seconds"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|svg|woff2?|png|jpe?g|webp|avif)$">
+    Header always set Cache-Control "public, max-age=31536000, immutable"
+    # Cloudflare reads this one in preference, and it is set to the same
+    # thing on purpose — the version in the URL is what makes it safe.
+    Header always set CDN-Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # Anything PHP produces is per-visitor: a session cookie, a CSRF token, or
+  # the ops page. A cached 200 here would be silent and severe.
+  <FilesMatch "\.php$">
+    Header always set Cache-Control "private, no-store, no-cache, must-revalidate, max-age=0"
+    Header always set CDN-Cache-Control "no-store"
+    Header always set Cloudflare-CDN-Cache-Control "no-store"
+    Header always set Vary "Cookie"
+  </FilesMatch>
+
+  # The ops page and the webcron must never appear anywhere, cached or not.
+  <FilesMatch "^(_ops|cron)\.php$">
+    Header always set X-Robots-Tag "noindex, nofollow, noarchive"
+  </FilesMatch>
+</IfModule>
+
+# Hidden files, sources and archives are never content.
+# _stub.php is the finder that every generated stub includes. It is not an
+# entry point: fetched on its own it has no AFROTECH_ENTRY and dies with a
+# 500, which is a log line for every bot that tries it. Say no instead.
+<Files "_stub.php">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</Files>
+
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+<FilesMatch "\.(md|log|sh|sql|bak|swp|inc|tpl|env|json|lock|dist)$">
+  Require all denied
+</FilesMatch>
+
+# HTTPS. cPanel issues a free certificate; there is no reason to serve this
+# form — which collects a name, an email and a phone number — over plain HTTP.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>

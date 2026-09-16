@@ -1,0 +1,100 @@
+/*
+ * Afrostrength contractors — the public pages.
+ *
+ * Built on base.css, which is the shared Afrostrength token set. The visual
+ * relationship to the academy is deliberate: same company, same typography,
+ * same warm palette. The wordmark is where they differ, because they are
+ * different products bought by different people.
+ */
+
+.mastheadOn {
+  background: rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+}
+
+/* ---- The directory ------------------------------------------------------ */
+
+.cardGrid {
+  list-style: none;
+  margin: var(--s-6) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--s-4);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--s-5);
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.cardTrade {
+  align-self: flex-start;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--tint);
+  color: var(--ink-soft);
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.cardName { margin: 4px 0 0; font: 600 var(--t-lead)/1.25 var(--font-display); }
+.cardName a { color: var(--ink); text-decoration: none; }
+.cardName a:hover { color: var(--red-deep); text-decoration: underline; text-underline-offset: 3px; }
+
+.cardHeadline { margin: 0; color: var(--ink-soft); }
+.cardMeta { margin: auto 0 0; padding-top: var(--s-3); font-size: var(--t-small); color: var(--muted); }
+
+.checkedMark {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--t-small);
+  font-weight: 600;
+  color: #1F6B45;
+}
+
+/* ---- The job board ------------------------------------------------------ */
+
+.jobList { list-style: none; margin: var(--s-6) 0 0; padding: 0; display: grid; gap: var(--s-4); }
+
+.job {
+  padding: var(--s-5);
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.jobTitle { margin: 0; font: 600 var(--t-lead)/1.3 var(--font-display); }
+.jobMeta { margin: 4px 0 0; font-size: var(--t-small); color: var(--muted); }
+.jobBody { margin: var(--s-3) 0 0; color: var(--ink-soft); white-space: pre-wrap; }
+
+/* The one line that carries the business model. */
+.jobPrivate {
+  margin: var(--s-4) 0 0;
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--hair);
+  font-size: var(--t-small);
+  color: var(--muted);
+}
+
+.filterBar {
+  display: flex;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  align-items: flex-end;
+  padding: var(--s-4);
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.filterBar .field { flex: 1 1 200px; margin: 0; }
+
+@media (max-width: 719px) {
+  .cardGrid { grid-template-columns: 1fr; }
+}

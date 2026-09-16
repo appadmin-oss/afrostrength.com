@@ -1,0 +1,770 @@
+/*
+ * Afrotech Academy — staff console.
+ *
+ * The layout grammar is Cloudscape's (cloudscape.design): a fixed top bar, a
+ * permanent side rail, breadcrumbs, a notifications region, content, and a
+ * help panel on the right. The tokens are the academy's own — inherited from
+ * afrotech.css, so the console and the site are visibly one institution.
+ *
+ * Two rules the old navigation broke, written down so they stay fixed:
+ *
+ *   1. A destination used several times an hour is never hidden. The rail is
+ *      permanent from 1024px; below that the four most-used destinations sit
+ *      in a bar under the thumb. The drawer is the phone's overflow, not the
+ *      primary path.
+ *   2. Exactly one thing on the screen is the current page, and it says so in
+ *      two ways — a filled background and a 3px bar — because the rail is
+ *      read at a glance while the eye is somewhere else.
+ */
+
+:root {
+  --nav-w: 260px;
+  --help-w: 320px;
+  --top-h: 60px;
+  --row-y: 12px;          /* comfortable */
+  --focus: #1B62C9;       /* 4.6:1 on white; the red is the brand's, not a focus colour */
+}
+
+[data-density="compact"] { --row-y: 6px; }
+
+.consoleBody {
+  margin: 0;
+  background: var(--tint);
+  color: var(--ink);
+  font: var(--t-body)/1.55 var(--font-body);
+  min-height: 100vh;
+}
+
+/* Focus is one ring everywhere, and it is never removed — only moved to the
+   wrapper when the control itself is inset. */
+/* Links get a colour. Without this the browser's default #0000EE showed up
+   on the sign-in page — the one page on the console that an outsider sees. */
+.consoleBody a,
+.signinPage a {
+  color: var(--focus);
+}
+
+.consoleBody a:hover,
+.signinPage a:hover {
+  color: #14489A;
+}
+
+/* …except the ones that are already styled as something else. */
+.consoleBody .btn,
+.consoleBody .navLink,
+.consoleBody .tabItem,
+.consoleBody .rowRef,
+.consoleBody .crumb a,
+.consoleBody .topBrand,
+.consoleBody .topUtil,
+.consoleBody .userLink,
+.consoleBody .pagerLink,
+.consoleBody .sortLink,
+.consoleBody .helpClose {
+  color: inherit;
+}
+
+.consoleBody .btn-primary { color: #fff; }
+.consoleBody .btn-link { color: var(--focus); }
+.consoleBody .btn-danger { color: var(--red-deep); }
+.consoleBody .navOn .navIcon { color: var(--red-deep); }
+.consoleBody .tabOn { color: var(--red-deep); }
+.consoleBody .userDanger { color: var(--red-deep); }
+.consoleBody .pagerOn { color: #fff; }
+
+.consoleBody :focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.srOnly {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.skipLink {
+  position: absolute; left: -9999px; top: 0; z-index: 100;
+  background: var(--ink); color: #fff; padding: 12px 18px;
+  font-weight: 600; text-decoration: none;
+}
+.skipLink:focus { left: 8px; top: 8px; }
+
+/* ══ Top navigation ═══════════════════════════════════════════════════ */
+
+.topNav {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; gap: var(--s-3);
+  height: var(--top-h); padding: 0 var(--s-4);
+  background: var(--ink); color: #fff;
+}
+
+.navToggle {
+  display: none;
+  background: none; border: 0; color: inherit; cursor: pointer;
+  min-width: 40px; min-height: 40px;
+  align-items: center; justify-content: center; border-radius: 6px;
+}
+.navToggle:hover { background: rgba(255,255,255,.12); }
+
+.topBrand {
+  display: flex; align-items: center; gap: var(--s-3);
+  color: inherit; text-decoration: none; min-height: 44px;
+}
+.topBrand:hover .topBrandName { text-decoration: underline; }
+
+/* The mark carries the brand red on a dark bar, where it measures well.
+   On white it was 3.31:1 and had to be inverted — that is why this rule is
+   scoped to the top bar and not shared. */
+.topNav .mark {
+  display: grid; place-items: center;
+  width: 32px; height: 32px; border-radius: 7px;
+  background: var(--red); color: #fff;
+  font: 700 13px/1 var(--font-display); letter-spacing: .04em;
+}
+
+.topBrandText { display: flex; flex-direction: column; line-height: 1.15; }
+.topBrandName { font: 600 15px/1.2 var(--font-display); letter-spacing: -.01em; }
+.topBrandSub  { font-size: var(--t-micro); color: rgba(255,255,255,.72); letter-spacing: .06em; text-transform: uppercase; }
+
+.topUtils { margin-left: auto; display: flex; align-items: center; gap: var(--s-2); }
+
+.topUtil {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 12px; min-height: 40px; border-radius: 7px;
+  color: rgba(255,255,255,.88); text-decoration: none; font-size: var(--t-body);
+}
+.topUtil:hover { background: rgba(255,255,255,.12); color: #fff; }
+.topCount {
+  background: var(--red); color: #fff; border-radius: 999px;
+  padding: 1px 7px; font: 600 11.5px/1.5 var(--font-mono);
+}
+
+/* ── User menu ────────────────────────────────────────────────────────
+   <details> rather than a scripted dropdown: it opens with the keyboard,
+   closes on Escape and works before any JavaScript has run. */
+.userMenu { position: relative; }
+.userButton {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: 6px 10px; min-height: 44px; border-radius: 7px;
+  cursor: pointer; list-style: none; color: rgba(255,255,255,.92);
+}
+.userButton::-webkit-details-marker { display: none; }
+.userButton:hover { background: rgba(255,255,255,.12); }
+
+.avatar {
+  display: grid; place-items: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,.18); color: #fff;
+  font: 600 11.5px/1 var(--font-body); letter-spacing: .03em;
+}
+.userText { display: flex; flex-direction: column; line-height: 1.2; text-align: left; }
+.userName { font-size: 13.5px; font-weight: 600; }
+.userRole { font-size: var(--t-micro); color: rgba(255,255,255,.7); }
+.userChev { opacity: .7; }
+.userMenu[open] .userChev { transform: rotate(180deg); }
+
+.userPanel {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 50;
+  width: 260px; padding: var(--s-4);
+  background: var(--page); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(45,38,32,.16);
+}
+.userPanelHead { margin: 0; font-weight: 600; font-size: 13.5px; word-break: break-all; }
+.userPanelRole { margin: 4px 0 0; font-size: var(--t-small); color: var(--muted); }
+.userPanelScope { display: block; }
+.userRule { border: 0; border-top: 1px solid var(--hair); margin: var(--s-3) 0; }
+.userLink {
+  display: block; width: 100%; text-align: left;
+  padding: 9px 8px; margin: 0 -8px; min-height: 40px;
+  background: none; border: 0; border-radius: 6px; cursor: pointer;
+  color: var(--ink-soft); font: var(--t-body)/1.5 var(--font-body); text-decoration: none;
+}
+.userLink:hover { background: var(--tint); color: var(--ink); }
+.userDanger { color: var(--red-deep); font-weight: 600; }
+.userSignout { margin: 0; }
+
+/* ══ App layout ═══════════════════════════════════════════════════════ */
+
+.appLayout {
+  display: grid;
+  grid-template-columns: var(--nav-w) minmax(0, 1fr);
+  align-items: start;
+  min-height: calc(100vh - var(--top-h));
+}
+.helpOpen .appLayout { grid-template-columns: var(--nav-w) minmax(0, 1fr) var(--help-w); }
+
+/* ══ Side navigation ══════════════════════════════════════════════════ */
+
+.sideNav {
+  position: sticky; top: var(--top-h);
+  height: calc(100vh - var(--top-h));
+  overflow-y: auto; overscroll-behavior: contain;
+  background: var(--page); border-right: 1px solid var(--border);
+}
+.sideNavInner { padding: var(--s-4) var(--s-3) var(--s-10); }
+
+.navSection { margin-top: var(--s-5); }
+.navSectionTitle {
+  margin: 0 0 var(--s-2); padding: 0 10px;
+  font: 600 var(--t-micro)/1.4 var(--font-body);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+.navList { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.navRule { border: 0; border-top: 1px solid var(--hair); margin: var(--s-4) 10px 0; }
+
+.navLink {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; min-height: 40px; border-radius: 7px;
+  position: relative;
+  color: var(--ink-soft); text-decoration: none; font-size: var(--t-body);
+}
+.navLink:hover { background: var(--tint); color: var(--ink); }
+.navIcon { flex: none; opacity: .75; }
+.navDot { width: 18px; height: 18px; }
+.navDot::after {
+  content: ""; display: block; width: 4px; height: 4px; border-radius: 50%;
+  background: currentColor; opacity: .45; margin: 7px 0 0 7px;
+}
+.navText { flex: 1; min-width: 0; }
+.navCount {
+  font: 600 11.5px/1.6 var(--font-mono);
+  background: var(--hair); color: var(--ink-soft);
+  border-radius: 999px; padding: 0 7px;
+}
+.navExt { flex: none; opacity: .55; }
+
+/* Current page, said twice: a filled row and a bar on the leading edge. */
+.navOn { background: var(--selected); color: var(--ink); font-weight: 600; }
+.navOn::before {
+  content: ""; position: absolute; left: 0; top: 7px; bottom: 7px;
+  width: 3px; border-radius: 0 3px 3px 0; background: var(--red);
+}
+.navOn .navIcon { opacity: 1; color: var(--red-deep); }
+.navOn .navCount { background: var(--red); color: #fff; }
+
+/* ══ Content column ═══════════════════════════════════════════════════ */
+
+.appMain { min-width: 0; padding: 0 var(--s-6) var(--s-16); }
+.appContent { max-width: 1080px; }
+.appWide .appContent { max-width: none; }
+
+.crumbs { padding: var(--s-4) 0 0; }
+.crumbList { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin: 0; padding: 0; }
+.crumb { display: flex; align-items: center; gap: 2px; font-size: var(--t-small); color: var(--muted); }
+.crumb a {
+  color: var(--ink-soft); text-decoration: none;
+  padding: 6px 4px; min-height: 24px; display: inline-flex; align-items: center;
+}
+.crumb a:hover { color: var(--red-deep); text-decoration: underline; }
+.crumb [aria-current] { color: var(--muted); padding: 6px 4px; }
+.crumbSep { opacity: .4; flex: none; }
+
+/* ══ Flashbar ═════════════════════════════════════════════════════════ */
+
+.flashbar { display: grid; gap: var(--s-2); padding: var(--s-4) 0 0; }
+.flashbar:empty { padding: 0; }
+
+.flash, .alert {
+  display: flex; align-items: flex-start; gap: var(--s-3);
+  padding: var(--s-3) var(--s-4); border-radius: 9px;
+  border: 1px solid var(--border); background: var(--page);
+}
+.flash-success, .alert-success { border-color: #BEDCCB; background: #F1F8F4; }
+.flash-error,   .alert-error   { border-color: #F2C0B5; background: #FDF2EF; }
+.flash-warning, .alert-warning { border-color: #E8D3A8; background: #FCF7EC; }
+.flash-info,    .alert-info    { border-color: #C6D5EC; background: #F2F6FC; }
+
+.flashIcon, .alertIcon { flex: none; padding-top: 2px; }
+.flashBody, .alertBody { flex: 1; min-width: 0; }
+.flashHead, .alertHead { margin: 0; font-weight: 600; font-size: var(--t-body); }
+.flashText, .alertText { margin: 3px 0 0; font-size: var(--t-body); color: var(--ink-soft); }
+.alertAction { flex: none; }
+
+.flashClose {
+  flex: none; background: none; border: 0; cursor: pointer;
+  color: var(--muted); border-radius: 6px;
+  min-width: 32px; min-height: 32px; display: grid; place-items: center;
+}
+.flashClose:hover { background: rgba(45,38,32,.07); color: var(--ink); }
+
+/* ══ Header ═══════════════════════════════════════════════════════════ */
+
+.hdr { display: grid; gap: 4px; }
+.hdr-h1 { padding: var(--s-6) 0 var(--s-5); }
+.hdrRow {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: var(--s-4); flex-wrap: wrap;
+}
+.hdrTitle {
+  margin: 0; min-width: 0;
+  font-family: var(--font-display); font-weight: 600; letter-spacing: -.015em;
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+}
+.hdr-h1 .hdrTitle { font-size: var(--t-h1); line-height: 1.2; }
+.hdr-h2 .hdrTitle { font-size: var(--t-h3); line-height: 1.3; }
+.hdr-h3 .hdrTitle { font-size: var(--t-read); line-height: 1.4; }
+
+/* The counter is a value, so it is set in the mono face and in muted ink —
+   it is the answer to "how many", not part of the title. */
+.hdrCounter { font: 400 var(--t-read)/1 var(--font-mono); color: var(--muted); }
+.hdr-h3 .hdrCounter { font-size: var(--t-body); }
+
+.hdrDesc { margin: 0; max-width: 70ch; color: var(--muted); font-size: var(--t-body); }
+.hdrActions { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+
+.infoLink {
+  font: 400 var(--t-small)/1 var(--font-body);
+  color: var(--focus); text-decoration: underline; text-underline-offset: 2px;
+  padding: 6px 2px; min-height: 24px; display: inline-flex; align-items: center;
+}
+.infoLink:hover { color: #14489A; }
+
+/* ══ Container ════════════════════════════════════════════════════════ */
+
+.box {
+  background: var(--page);
+  border: 1px solid var(--border); border-radius: 11px;
+  overflow: hidden;
+}
+.boxHead { padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--hair); }
+.boxBody { padding: var(--s-5); }
+.boxFoot { padding: var(--s-4) var(--s-5); border-top: 1px solid var(--hair); background: var(--cream); }
+.boxFlush .boxBody { padding: 0; }
+
+/* ══ Stack and columns ════════════════════════════════════════════════ */
+
+.stack { display: grid; }
+.stack-xs { gap: var(--s-2); }
+.stack-s  { gap: var(--s-3); }
+.stack-m  { gap: var(--s-5); }
+.stack-l  { gap: var(--s-8); }
+
+.cols { display: grid; gap: var(--s-5); }
+.cols-1 { grid-template-columns: 1fr; }
+.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+.cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+
+/* ══ Key-value pairs ══════════════════════════════════════════════════ */
+
+.kv { display: grid; gap: var(--s-4) var(--s-5); margin: 0; }
+.kvGroup { display: grid; gap: var(--s-3); align-content: start; }
+.kvGroupTitle {
+  margin: 0; font: 600 var(--t-micro)/1.4 var(--font-body);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+.kvPair { min-width: 0; }
+.kvLabel { font-size: var(--t-small); color: var(--muted); font-weight: 500; }
+.kvValue { margin: 2px 0 0; font-size: var(--t-body); color: var(--ink); overflow-wrap: anywhere; }
+.kvDash { color: var(--muted); }
+
+/* ══ Status indicator ═════════════════════════════════════════════════ */
+
+.stat { display: inline-flex; align-items: center; gap: 6px; font-size: var(--t-body); white-space: nowrap; }
+.statIcon { flex: none; }
+.stat-success     { color: #1F6B45; }
+.stat-error       { color: #A82A12; }
+.stat-warning     { color: #8A5A0B; }
+.stat-info        { color: #1B62C9; }
+.stat-in-progress { color: #1B62C9; }
+.stat-pending     { color: var(--muted); }
+.stat-stopped     { color: var(--muted); }
+.stat-loading     { color: var(--muted); }
+.stat-not-started { color: var(--muted); }
+.stat-log         { color: var(--muted); }
+.statText:empty { display: none; }
+
+.badge {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  font: 600 var(--t-small)/1.6 var(--font-body);
+}
+.badge-grey  { background: var(--hair); color: var(--ink-soft); }
+.badge-red   { background: #FBE4DE; color: #A82A12; }
+.badge-green { background: #E4F1EA; color: #1F6B45; }
+.badge-amber { background: #FBF0DA; color: #8A5A0B; }
+
+/* ══ Buttons ══════════════════════════════════════════════════════════ */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 40px; padding: 9px 18px; border-radius: 8px;
+  font: 600 var(--t-body)/1.2 var(--font-body);
+  border: 1px solid transparent; cursor: pointer; text-decoration: none;
+  transition: background-color .12s ease, border-color .12s ease;
+}
+.btn-primary { background: var(--red); color: #fff; }
+.btn-primary:hover { background: var(--red-deep); }
+.btn-normal { background: var(--page); color: var(--ink); border-color: #C9C3BE; }
+.btn-normal:hover { background: var(--tint); border-color: var(--ink-soft); }
+.btn-link { background: none; color: var(--focus); padding-left: 10px; padding-right: 10px; }
+.btn-link:hover { background: rgba(27,98,201,.08); text-decoration: underline; }
+.btn-danger { background: var(--page); color: var(--red-deep); border-color: #E3B6AB; }
+.btn-danger:hover { background: #FDF2EF; border-color: var(--red-deep); }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.btnFull { width: 100%; }
+
+@media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+
+/* ══ Table ════════════════════════════════════════════════════════════ */
+
+/*
+ * The table wrapper.
+ *
+ * It does NOT scroll on a wide screen, and that is deliberate. `overflow-x`
+ * makes an element a scroll container, and a sticky <th> then sticks to THAT
+ * container rather than to the viewport — so `top: 60px` was pushing a 60px
+ * band of empty table above the header row on every list in the console, and
+ * the header never stuck to anything.
+ *
+ * So: sticky header where the table fits, sideways scrolling where it does
+ * not. The two cannot both be had through one element.
+ */
+.tableWrap { max-width: 100%; }
+
+.dataTable { width: 100%; border-collapse: collapse; font-size: var(--t-body); }
+.dataTable th, .dataTable td {
+  text-align: left; padding: var(--row-y) var(--s-4);
+  border-bottom: 1px solid var(--hair); vertical-align: top;
+}
+/*
+ * The header row is NOT sticky, and the honest reason is that it cannot be.
+ *
+ * It sits inside .box, which clips to its own border radius with
+ * overflow: hidden — and a sticky element cannot escape a clipping ancestor.
+ * It stuck to the box, which never scrolls on its own, so it did nothing. The
+ * previous attempt also set top: 60px against a scroll container it did not
+ * mean, which painted a 60px band of empty table above the header on every
+ * list in the console.
+ *
+ * Doing it properly means dropping the clip and reassembling the rounded
+ * corners on whichever child happens to be first and last on each page, which
+ * is four fragile rules for a nicety. Left out until it is worth that.
+ */
+.dataTable thead th {
+  background: var(--cream); border-bottom: 1px solid var(--border);
+  font: 600 var(--t-small)/1.5 var(--font-body);
+  color: var(--ink-soft); white-space: nowrap;
+  padding-top: 10px; padding-bottom: 10px;
+}
+.dataTable tbody tr:hover { background: var(--cream); }
+.dataTable tbody tr:last-child td { border-bottom: 0; }
+
+/* The whole row is not a link — a row with three links in it and a fourth
+   invisible one covering all of them is a trap for anyone tabbing. The
+   reference is the link, and it is the first cell. */
+.rowRef {
+  font: 600 var(--t-body)/1.4 var(--font-mono);
+  color: var(--ink); text-decoration: none;
+  display: inline-block; padding: 2px 0; min-height: 24px;
+  /* A reference is one token. Wrapped over two lines it reads as two. */
+  white-space: nowrap;
+}
+.rowRef:hover { color: var(--red-deep); text-decoration: underline; }
+.rowName { display: block; font-weight: 600; }
+.rowSub { display: block; font-size: var(--t-small); color: var(--muted); }
+
+.sortLink {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: inherit; text-decoration: none;
+  min-height: 24px; padding: 2px 0;
+}
+.sortLink:hover { color: var(--red-deep); text-decoration: underline; }
+.sortOn { color: var(--ink); }
+.sortIcon { flex: none; }
+
+/* ── The table's own toolbar ─────────────────────────────────────────── */
+.tableTools {
+  display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap;
+  padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--hair);
+  background: var(--page);
+}
+.tableFilter { display: flex; align-items: center; gap: var(--s-2); flex: 1 1 280px; margin: 0; }
+.filterWrap { position: relative; flex: 1; display: flex; align-items: center; }
+.filterIcon { position: absolute; left: 11px; color: var(--muted); pointer-events: none; }
+/* Specificity, not preference: afrotech.css sets padding on
+   input[type="search"], which is (0,1,1) and beats a bare class at (0,1,0).
+   The search icon was sitting on top of the placeholder text because of it.
+   Two classes make this (0,2,0) and the icon gets its gutter back. */
+.filterWrap .filterInput {
+  width: 100%; min-height: 40px; padding: 9px 12px 9px 36px;
+  border: 1px solid #C9C3BE; border-radius: 8px; background: var(--page);
+  /* 16px, because anything smaller makes iOS Safari zoom the page on focus */
+  font: var(--t-read)/1.4 var(--font-body); color: var(--ink);
+}
+.filterWrap .filterInput:focus { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--focus); }
+
+.selectFilter { display: flex; align-items: center; gap: var(--s-2); margin: 0; }
+.selectLabel { font-size: var(--t-small); color: var(--muted); font-weight: 500; }
+.selectFilter .selectInput {
+  min-height: 40px; padding: 8px 10px; border: 1px solid #C9C3BE; border-radius: 8px;
+  background: var(--page); font: var(--t-read)/1.4 var(--font-body); color: var(--ink);
+}
+/* The Go button is hidden only once JS has confirmed it can submit for us. */
+.js .selectGo { display: none; }
+
+.prefs { position: relative; margin-left: auto; }
+.prefsButton {
+  display: inline-flex; align-items: center; gap: 7px;
+  min-height: 40px; padding: 9px 14px; border-radius: 8px;
+  border: 1px solid #C9C3BE; background: var(--page);
+  font: 600 var(--t-body)/1.2 var(--font-body); cursor: pointer; list-style: none;
+}
+.prefsButton::-webkit-details-marker { display: none; }
+.prefsButton:hover { background: var(--tint); }
+.prefsPanel {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 30;
+  width: 250px; padding: var(--s-4); margin: 0;
+  background: var(--page); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(45,38,32,.16);
+  display: grid; gap: var(--s-4);
+}
+.prefsGroup { border: 0; margin: 0; padding: 0; display: grid; gap: 6px; }
+.prefsGroup legend {
+  padding: 0 0 4px; font: 600 var(--t-small)/1.4 var(--font-body); color: var(--ink-soft);
+}
+.prefsRadio { display: flex; align-items: center; gap: 8px; min-height: 32px; font-size: var(--t-body); cursor: pointer; }
+.prefsRadio input { width: 18px; height: 18px; accent-color: var(--red); }
+.prefsFoot { border-top: 1px solid var(--hair); padding-top: var(--s-3); }
+
+/* ── Pagination ─────────────────────────────────────────────────────── */
+.pager {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--s-4); flex-wrap: wrap;
+  padding: var(--s-3) var(--s-4); border-top: 1px solid var(--hair);
+}
+.pagerCount { margin: 0; font-size: var(--t-small); color: var(--muted); }
+.pagerList { list-style: none; display: flex; align-items: center; gap: 2px; margin: 0; padding: 0; }
+.pagerLink {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 40px; min-height: 40px; padding: 0 10px; border-radius: 7px;
+  color: var(--ink-soft); text-decoration: none; font-size: var(--t-body);
+}
+.pagerLink:hover { background: var(--tint); color: var(--ink); }
+.pagerOn { background: var(--ink); color: #fff; font-weight: 600; }
+.pagerOn:hover { background: var(--ink); color: #fff; }
+.pagerOff { color: #B5AEA8; }
+.pagerOff:hover { background: none; color: #B5AEA8; }
+.pagerGap { padding: 0 4px; color: var(--muted); }
+
+/* ══ Empty states ═════════════════════════════════════════════════════ */
+
+.emptyState { padding: var(--s-12) var(--s-5); text-align: center; display: grid; justify-items: center; gap: var(--s-2); }
+.emptyTitle { margin: var(--s-3) 0 0; font: 600 var(--t-lead)/1.4 var(--font-display); }
+.emptyText { margin: 0; max-width: 46ch; color: var(--muted); }
+.emptyAction { margin-top: var(--s-3); }
+
+/* ══ Forms ════════════════════════════════════════════════════════════ */
+
+.field { display: grid; gap: 5px; }
+.fieldLabel { font-size: var(--t-body); font-weight: 600; color: var(--ink); }
+.fieldOptional { font-weight: 400; color: var(--muted); }
+.fieldHint { margin: 0; font-size: var(--t-small); color: var(--muted); }
+.field .control {
+  width: 100%; min-height: 44px; padding: 10px 12px;
+  border: 1px solid #C9C3BE; border-radius: 8px; background: var(--page);
+  font: var(--t-read)/1.5 var(--font-body); color: var(--ink);
+}
+.field textarea.control { min-height: 96px; resize: vertical; }
+.field .control:focus { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--focus); }
+.fieldBad .control { border-color: var(--red-deep); border-width: 2px; }
+.fieldError {
+  display: flex; align-items: flex-start; gap: 6px; margin: 0;
+  font-size: var(--t-small); color: #A82A12; font-weight: 500;
+}
+.fieldError svg { flex: none; margin-top: 2px; }
+
+.formActions {
+  display: flex; align-items: center; justify-content: flex-end; gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+/* ══ Help panel ═══════════════════════════════════════════════════════ */
+
+.helpPanel {
+  position: sticky; top: var(--top-h);
+  height: calc(100vh - var(--top-h)); overflow-y: auto; overscroll-behavior: contain;
+  background: var(--page); border-left: 1px solid var(--border);
+}
+.helpPanelHead {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+  padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--hair); background: var(--page);
+}
+.helpPanelTitle { margin: 0; font: 600 var(--t-read)/1.4 var(--font-display); }
+.helpClose {
+  display: grid; place-items: center; min-width: 32px; min-height: 32px;
+  border-radius: 6px; color: var(--muted); text-decoration: none;
+}
+.helpClose:hover { background: var(--tint); color: var(--ink); }
+.helpPanelBody { padding: var(--s-5); font-size: var(--t-body); color: var(--ink-soft); }
+.helpPanelBody p { margin: 0 0 var(--s-3); }
+.helpPanelBody strong { color: var(--ink); }
+.helpList { margin: 0 0 var(--s-4); }
+.helpList dt { font-weight: 600; color: var(--ink); margin-top: var(--s-3); }
+.helpList dd { margin: 2px 0 0; }
+.helpMoreTitle { margin: var(--s-5) 0 var(--s-2); font: 600 var(--t-body)/1.4 var(--font-body); color: var(--ink); }
+.helpMore { margin: 0; padding-left: 18px; }
+.helpMore a { color: var(--focus); }
+
+/* ══ Tab bar (phones) ═════════════════════════════════════════════════ */
+
+.tabBar { display: none; }
+
+/* ══ Responsive ═══════════════════════════════════════════════════════
+   Three breakpoints, and each one is where something actually stops
+   fitting rather than a round number. */
+
+@media (max-width: 1200px) {
+  .helpOpen .appLayout { grid-template-columns: var(--nav-w) minmax(0, 1fr); }
+  /* The panel becomes an overlay rather than a third column: at this width a
+     320px panel leaves the table too narrow to read. */
+  .helpPanel {
+    position: fixed; right: 0; top: var(--top-h); z-index: 45;
+    width: min(360px, 92vw); box-shadow: -8px 0 32px rgba(45,38,32,.18);
+  }
+}
+
+@media (max-width: 1023px) {
+  .appLayout { grid-template-columns: minmax(0, 1fr); }
+  .navToggle { display: flex; }
+
+  /* The rail becomes a drawer. It is closed by default and `hidden` is not
+     used — the links stay in the tab order only when the drawer is open,
+     which is what [inert] would do if it were universally supported, so the
+     visibility switch does the same job. */
+  .sideNav {
+    position: fixed; left: 0; top: var(--top-h); z-index: 46;
+    width: min(300px, 86vw); height: calc(100vh - var(--top-h));
+    transform: translateX(-102%); visibility: hidden;
+    transition: transform .18s ease, visibility .18s;
+    box-shadow: 8px 0 32px rgba(45,38,32,.18);
+  }
+  .navOpen .sideNav { transform: none; visibility: visible; }
+  .navOpen::after {
+    content: ""; position: fixed; inset: var(--top-h) 0 0; z-index: 44;
+    background: rgba(45,38,32,.42);
+  }
+
+  .appMain { padding: 0 var(--s-4) calc(var(--s-16) + 64px); }
+
+  /* Narrow: the table needs to scroll sideways, so the wrapper becomes a
+     scroll container — and the header gives up being sticky, because inside
+     a scroll container it would stick to the wrapper and leave a gap. */
+  .tableWrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+
+  /* The tab bar. Four destinations, permanently visible, under the thumb. */
+  .tabBar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 42;
+    display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+    background: var(--page); border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tabItem {
+    display: grid; justify-items: center; gap: 3px;
+    padding: 9px 4px 8px; min-height: 56px;
+    color: var(--muted); text-decoration: none;
+    font: 500 var(--t-micro)/1.3 var(--font-body);
+  }
+  .tabOn { color: var(--red-deep); font-weight: 600; }
+  .tabOn svg { stroke-width: 2.1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sideNav { transition: none; }
+}
+
+@media (max-width: 719px) {
+  .cols-2, .cols-3, .cols-4 { grid-template-columns: 1fr; }
+  .kv.cols-2, .kv.cols-3, .kv.cols-4 { grid-template-columns: 1fr; }
+  .userText { display: none; }
+  .topBrandSub { display: none; }
+  .topUtilText { display: none; }
+  .hdr-h1 .hdrTitle { font-size: var(--t-h2); }
+  .prefs { margin-left: 0; }
+  .prefsPanel { right: auto; left: 0; }
+  .formActions { flex-direction: column-reverse; align-items: stretch; }
+  .formActions .btn { width: 100%; }
+}
+
+/* 200% zoom at 1280px is a 640px viewport — the same rules cover it, which
+   is the point of sizing the breakpoints in the content rather than in
+   device names. */
+
+/* ══ The week ═════════════════════════════════════════════════════════
+ *
+ * Seven columns on a wide screen, one on a phone. Not a month grid: a month
+ * of thirty small boxes is a planning view, and the question staff open this
+ * with is "what is on this week and who is teaching it".
+ */
+
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--s-2);
+  align-items: start;
+}
+
+.weekDay {
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  min-height: 120px;
+  overflow: hidden;
+}
+
+/* Today is marked with a bar and a word, not colour alone. */
+.weekToday { border-color: var(--red); }
+
+.weekDayHead {
+  margin: 0;
+  padding: 10px var(--s-3);
+  border-bottom: 1px solid var(--hair);
+  background: var(--cream);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+  font: 600 var(--t-small)/1.3 var(--font-body);
+}
+.weekToday .weekDayHead { background: var(--selected); }
+
+.weekDayName { text-transform: uppercase; letter-spacing: .06em; }
+.weekDayDate { color: var(--muted); font-weight: 400; }
+.weekTodayTag {
+  font: 600 var(--t-micro)/1.5 var(--font-body);
+  background: var(--red); color: #fff;
+  border-radius: 999px; padding: 0 7px;
+}
+
+.weekNone { margin: 0; padding: var(--s-4) var(--s-3); color: #C4BDB7; text-align: center; }
+
+.weekList { list-style: none; margin: 0; padding: 0; display: grid; }
+.weekItem { padding: var(--s-3); border-bottom: 1px solid var(--hair); }
+.weekItem:last-child { border-bottom: 0; }
+
+.weekTime { margin: 0; font: 600 var(--t-small)/1.4 var(--font-mono); color: var(--red-deep); }
+.weekTitle { margin: 2px 0 0; font-weight: 600; font-size: var(--t-body); }
+.weekMeta { margin: 2px 0 0; font-size: var(--t-small); color: var(--muted); }
+
+/* A cancelled session stays visible. Struck through AND labelled — strike
+   alone is easy to miss and says nothing to a screen reader. */
+.weekOff .weekTitle { text-decoration: line-through; color: var(--muted); }
+.weekOff .weekTime { color: var(--muted); }
+.weekCancelled { margin: var(--s-2) 0 0; }
+
+@media (max-width: 1100px) {
+  .weekGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 719px) {
+  .weekGrid { grid-template-columns: 1fr; }
+  /* On a phone a day with nothing on is noise between the days that matter. */
+  .weekDay:not(:has(.weekList)) { display: none; }
+}
