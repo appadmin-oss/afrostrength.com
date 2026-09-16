@@ -169,18 +169,20 @@ function migrations_run(string $actor = 'ops'): array
  * Lifted straight from Africa-GATES' database/check-state.php, which is the
  * single most useful file in that repository when something is wrong on a
  * host you cannot log in to: it turns "the site is broken" into "the
- * notifications table is missing".
+ * introductions table is missing".
  *
  * @return array<string,bool>
  */
 function schema_state(): array
 {
+    // This product's own tables. It came over from the academy still listing
+    // the academy's — enrolments, submissions, certificates — so the ops page
+    // reported a healthy schema as eighteen missing tables, which is the one
+    // thing an ops page must never do.
     $expected = [
-        'applications', 'application_events', 'application_notes', 'settings',
-        'notifications', 'login_tokens', 'enrolments', 'enrolment_modules',
-        'submissions', 'class_sessions', 'attendance', 'messages',
-        'certificates', 'sponsors', 'sponsor_tokens', 'holidays',
-        'data_requests', 'schema_migrations',
+        'contractors', 'contractor_skills', 'jobs', 'job_responses',
+        'introductions', 'staff', 'staff_signin_attempts', 'settings',
+        'schema_migrations',
     ];
     $rows = db_all(
         "SELECT table_name AS t FROM information_schema.tables WHERE table_schema = DATABASE()",
@@ -196,7 +198,7 @@ function schema_state(): array
 function schema_counts(): array
 {
     $out = [];
-    foreach (['applications', 'application_events', 'notifications', 'enrolments', 'schema_migrations'] as $t) {
+    foreach (['contractors', 'jobs', 'job_responses', 'introductions', 'schema_migrations'] as $t) {
         try {
             $row = db_one("SELECT COUNT(*) AS n FROM `{$t}`");
             $out[$t] = (int)($row['n'] ?? 0);

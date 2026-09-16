@@ -10,24 +10,23 @@ require_once __DIR__ . '/cloudflare.php';
  *
  * Taken from the academy's, because the security reasoning is the same and
  * re-deriving it would mean re-deriving the mistakes. The ROLES are not:
- * this product has admins and agents, and there is no mentor because nobody
- * here marks anything.
+ * this product has admins and agents only — there is no mentor, because
+ * nobody here marks anything.
  *
- * Passwords here, unlike the learner portal, because a member of staff signs
- * in several times a day from a shared machine at a centre and an emailed
- * link every time would be unworkable. `password_hash()` picks the algorithm,
- * so an account made today under bcrypt keeps working when the default moves.
+ * Passwords rather than emailed links, because a member of staff signs in
+ * several times a day from a shared machine and a link every time would be
+ * unworkable. `password_hash()` picks the algorithm, so an account made today
+ * under bcrypt keeps working when the default moves.
  *
- * Three roles, and the separation is structural rather than cosmetic:
+ * Two roles, and the separation is structural rather than cosmetic:
  *
- *   admin    every centre, and can add colleagues
- *   advisor  works applications at their own centre
- *   mentor   marks work; never sees a fee, a funding answer or a sponsor
+ *   admin  everything, including adding colleagues and setting the fee
+ *   agent  checks contractors and works jobs; cannot change the fee or the
+ *          money already owed, and cannot make another account
  *
- * The portal tells a learner, in as many words, that the person marking their
- * work cannot see their fee arrangement. That sentence is only true if a
- * mentor session cannot reach admissions at all, which is what
- * require_admissions() is for.
+ * The directory's promise is that somebody at Afrostrength checked each
+ * listing. That is only worth anything if the checking and the charging are
+ * different hands, which is what require_admin() is for.
  */
 
 const STAFF_SESSION_KEY = 'staff_id';
@@ -61,7 +60,7 @@ function staff_create(string $email, string $name, string $password, string $rol
         return ['ok' => false, 'error' => 'That does not look like a complete email address.'];
     }
     if ($name === '') {
-        return ['ok' => false, 'error' => 'Give the account a name — the learner sees it on their messages.'];
+        return ['ok' => false, 'error' => 'Give the account a name — it is what a contractor sees when you write to them.'];
     }
     // Length, not character classes. A long passphrase beats a short one with
     // a symbol in it, and the rules that demand symbols produce Password1!
@@ -281,9 +280,8 @@ function staff_all(): array
 }
 
 /**
- * Admissions work. A mentor reaching this gets a 404, not a sign-in form —
- * the page does not exist for them, and saying so is more honest than
- * implying a different password would help.
+ * Directory work — every account here does it. Kept as its own guard so the
+ * day a read-only role is added, the pages that write already say so.
  */
 function require_admissions(): array
 {
@@ -292,6 +290,11 @@ function require_admissions(): array
     return $staff;
 }
 
+/**
+ * The money and the colleagues. An agent reaching this gets a 404, not a
+ * sign-in form: the page does not exist for them, and saying so is more
+ * honest than implying a different password would help.
+ */
 function require_admin(): array
 {
     $staff = require_staff();
