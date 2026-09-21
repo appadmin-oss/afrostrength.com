@@ -61,7 +61,7 @@ page_head($done ? 'We have your listing' : 'Join the directory', 'join/',
   </p>
 
   <div class="actions">
-    <a class="btn btnPrimary" href="<?= e(app_url('')) ?>">See the directory</a>
+    <a class="btn btnPrimary" href="<?= e(app_url('directory/')) ?>">See the directory</a>
     <a class="btn btnSecondary" href="<?= e(app_url('work/')) ?>">See what work is about</a>
   </div>
 

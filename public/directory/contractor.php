@@ -9,8 +9,8 @@ declare(strict_types=1);
  * job board, where the client's details are the thing being withheld.
  */
 
-require_once __DIR__ . '/../lib/shell.php';
-require_once __DIR__ . '/../lib/cloudflare.php';
+require_once __DIR__ . '/../../lib/shell.php';
+require_once __DIR__ . '/../../lib/cloudflare.php';
 
 cache_public(300);
 
@@ -20,7 +20,7 @@ if ($c === null) {
     page_head('Not found');
     echo '<h1>That listing is not here</h1>';
     echo '<p class="lede">It may have been withdrawn, or the link may be wrong.</p>';
-    echo '<p><a class="btn btnPrimary" href="' . e(app_url('')) . '">Back to the directory</a></p>';
+    echo '<p><a class="btn btnPrimary" href="' . e(app_url('directory/')) . '">Back to the directory</a></p>';
     page_foot();
     exit;
 }
@@ -31,7 +31,7 @@ page_head($c['full_name'] . ' — ' . $c['trade'], '',
   $c['headline'] . ' ' . $c['city'] . '. Checked by Afrostrength.');
 ?>
 
-<p class="screenNote"><a href="<?= e(app_url('')) ?>">← All contractors</a></p>
+<p class="screenNote"><a href="<?= e(app_url('directory/')) ?>">← All contractors</a></p>
 
 <h1><?= e((string)$c['full_name']) ?></h1>
 <p class="lede"><?= e((string)$c['headline']) ?></p>

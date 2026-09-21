@@ -180,9 +180,12 @@ function schema_state(): array
     // reported a healthy schema as eighteen missing tables, which is the one
     // thing an ops page must never do.
     $expected = [
+        // 0001 base
         'contractors', 'contractor_skills', 'jobs', 'job_responses',
         'introductions', 'staff', 'staff_signin_attempts', 'settings',
         'schema_migrations',
+        // 0002 studio enquiries and the outbox
+        'enquiries', 'notifications',
     ];
     $rows = db_all(
         "SELECT table_name AS t FROM information_schema.tables WHERE table_schema = DATABASE()",
@@ -198,7 +201,7 @@ function schema_state(): array
 function schema_counts(): array
 {
     $out = [];
-    foreach (['contractors', 'jobs', 'job_responses', 'introductions', 'schema_migrations'] as $t) {
+    foreach (['enquiries', 'contractors', 'jobs', 'introductions', 'notifications'] as $t) {
         try {
             $row = db_one("SELECT COUNT(*) AS n FROM `{$t}`");
             $out[$t] = (int)($row['n'] ?? 0);

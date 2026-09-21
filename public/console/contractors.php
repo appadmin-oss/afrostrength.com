@@ -126,7 +126,7 @@ console_head('Contractors', $staff, $current, [
               <td>
                 <div style="display:flex;gap:6px;flex-wrap:wrap">
                   <?php if ($c['state'] === 'verified'): ?>
-                    <a class="btn btn-link" href="<?= e(app_url('contractor.php?c=' . urlencode((string)$c['slug']))) ?>">View</a>
+                    <a class="btn btn-link" href="<?= e(app_url('directory/contractor.php?c=' . urlencode((string)$c['slug']))) ?>">View</a>
                   <?php endif; ?>
                   <details class="prefs">
                     <summary class="prefsButton">Set state</summary>

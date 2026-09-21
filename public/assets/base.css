@@ -1,36 +1,85 @@
 /*
- * Afrotech Academy — early registration.
+ * afrostrength.com — the studio site.
  *
- * One stylesheet, no build step, no framework. It carries the same tokens as
- * the platform so the page a learner registers on today and the portal they
- * sign into next month look like the same institution.
+ * One stylesheet, no build step, no framework. The page has to be fast on a
+ * Nigerian mobile connection, and a build pipeline is a thing that breaks
+ * between here and a cPanel account nobody can SSH into.
  *
- * Colours are hex rather than oklch: this page has to render on whatever
- * browser a Lagos internet café has installed, and a token nobody can parse
- * is a page with no colour at all.
+ * The tokens below are the design handoff's, entire: every colour, shadow,
+ * radius and type role the design decided. Nothing outside this block is
+ * allowed to name a colour or a size — if a value is needed that is not here,
+ * the design has been misread.
+ *
+ * It started as a copy of the academy's stylesheet, which is why the
+ * directory pages still speak of --red; see the alias note below.
  */
 
 :root {
-  --page: #FFFFFF;
-  --cream: #FCFAF6;
-  --tint: #F8F7F5;
-  --hair: #F2F0EE;
-  --border: #E9E6E3;
-  --muted: #6F6660;      /* measured 5.61:1 on white — the platform's #7F7670 is 4.44 and fails */
-  --ink-soft: #4E463F;
-  --ink: #2D2620;
-  --red: #DE3719;
-  --red-deep: #B32E16;
-  --success: #2C7A52;
+  /*
+   * Colour is authored in OKLCH, which the design handoff names as the source
+   * of truth; the hex above each is the approximate sRGB fallback.
+   *
+   * The two-declaration pattern is deliberate. A browser that cannot parse
+   * oklch() drops that line and keeps the hex it already read, so the page
+   * still has its colour — which matters on whatever build is installed on
+   * the machine in a Lagos internet cafe. A browser that can parse it takes
+   * the second and gets the wider gamut the design was drawn in.
+   */
+  --page: var(--white);        --page: oklch(1 0 0);
+  --cream: #FBF3E9;       --cream: oklch(0.973 0.015 80);
+  --tint: #F9F7F5;        --tint: oklch(0.977 0.005 70);
+  --hair: #F0EDEA;        --hair: oklch(0.945 0.005 70);
+  --border: #E7E3DF;      --border: oklch(0.914 0.006 70);
+  --muted: #7A716A;       --muted: oklch(0.515 0.012 60);
+  --ink-soft: #463D36;    --ink-soft: oklch(0.30 0.014 55);
+  --ink: #2B231E;         --ink: oklch(0.19 0.012 55);
+  --on-dark: #DFDBD6;     --on-dark: oklch(0.88 0.008 70);
+  --accent: #F0552A;      --accent: oklch(0.673 0.211 40);
+  --accent-deep: #B4123F; --accent-deep: oklch(0.529 0.211 16.5);
+  --success: #2F8459;     --success: oklch(0.50 0.13 150);
+  --danger: #C9422C;      --danger: oklch(0.55 0.20 25);
+  /* Type and marks on --ink and on the gradient. Not --page: that is the
+     ground a page sits on, and the two being the same colour today is a
+     coincidence rather than a reason to confuse them. */
+  --white: var(--white);       --white: oklch(1 0 0);
+
+  /*
+   * The one gradient on the site. The handoff is explicit that there is
+   * exactly one and that no others are to be added, so it lives here as a
+   * token rather than being retyped at each of the five places it appears.
+   */
+  --grad: linear-gradient(135deg, var(--accent), var(--accent-deep));
+
+  /* --lift-hi is reserved: the hero mockup, its floating stat card, and the
+     Platform dropdown. Nothing else is allowed to sit that high. */
+  --lift: 0 1px 2px oklch(0.19 0.012 55 / 0.04), 0 10px 28px oklch(0.19 0.012 55 / 0.07);
+  --lift-hi: 0 2px 6px oklch(0.19 0.012 55 / 0.06), 0 22px 50px oklch(0.19 0.012 55 / 0.11);
+
+  /*
+   * The contractor directory was built before this design arrived and its
+   * pages are written against --red / --red-deep. Aliased rather than
+   * renamed across forty files: the names differ, the colour does not.
+   */
+  --red: var(--accent);
+  --red-deep: var(--accent-deep);
   --selected: #FDEEEA;
 
+  /* 4px based, and only the steps the design actually uses. */
   --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
-  --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-10: 40px;
-  --s-12: 48px; --s-16: 64px;
+  --s-5: 20px; --s-6: 24px; --s-7: 28px; --s-8: 32px;
+  --s-10: 40px; --s-11: 44px; --s-12: 48px; --s-13: 52px;
+  --s-16: 64px; --s-20: 80px; --s-22: 88px;
 
   --t-micro: 11px; --t-small: 12.5px; --t-body: 14px;
   --t-read: 16px;  --t-lead: 18px;    --t-h3: 20px;
   --t-h2: 24px;    --t-h1: 30px;
+  /* The handoff's base body size. Distinct from --t-read, which is the size
+     of a control's own text: 17px reads well in a paragraph and is too large
+     inside a 44px button. */
+  --t-base: 17px;
+
+  /* The page container, identical on every section so left edges align. */
+  --shell: 1200px;
 }
 
 * { box-sizing: border-box; }
@@ -57,7 +106,7 @@ body {
   margin: 0;
   background: var(--cream);
   color: var(--ink);
-  font: var(--t-read)/1.6 var(--font-body);
+  font: var(--t-base)/1.6 var(--font-body);
   /* Tabular figures everywhere by default: a reference, a count or a
      percentage that changes must not shift the text around it. */
   font-variant-numeric: tabular-nums;
@@ -90,7 +139,7 @@ h1, h2, h3, legend, .wordmark, .progressNum, .refValue {
   top: var(--s-2);
   padding: var(--s-3) var(--s-4);
   background: var(--ink);
-  color: #FFFFFF;
+  color: var(--white);
   border-radius: 8px;
   text-decoration: none;
   z-index: 10;
@@ -111,7 +160,7 @@ h1, h2, h3, legend, .wordmark, .progressNum, .refValue {
 
 .masthead {
   background: var(--ink);
-  color: #FFFFFF;
+  color: var(--white);
   padding: var(--s-4) var(--s-5);
 }
 .mastheadRow {
@@ -133,10 +182,10 @@ h1, h2, h3, legend, .wordmark, .progressNum, .refValue {
   font-size: var(--t-body);
   font-weight: 700;
   letter-spacing: 0.01em;
-  color: #FFFFFF;
+  color: var(--white);
 }
 .wordmark { font-size: var(--t-lead); font-weight: 700; letter-spacing: -0.01em; }
-.parent { display: block; font-size: var(--t-small); color: #C8C0B8; }
+.parent { display: block; font-size: var(--t-small); color: var(--on-dark); }
 
 .wrap {
   max-width: 720px;
@@ -306,7 +355,7 @@ input:focus, select:focus { border-color: var(--red-deep); }
 .errorSummary {
   margin: 0 0 var(--s-6);
   padding: var(--s-5);
-  background: #FDF0ED;
+  background: var(--selected);
   border: 2px solid var(--red-deep);
   border-radius: 12px;
 }
@@ -344,8 +393,8 @@ input:focus, select:focus { border-color: var(--red-deep); }
   cursor: pointer;
   text-decoration: none;
 }
-.btnPrimary { background: var(--red-deep); color: #FFFFFF; }
-.btnPrimary:hover { background: #99270F; }
+.btnPrimary { background: var(--red-deep); color: var(--white); }
+.btnPrimary:hover { background: var(--accent-deep); }
 .btnSecondary { background: var(--page); border-color: var(--border); color: var(--ink); }
 .btnSecondary:hover { border-color: var(--ink-soft); }
 .btnBlock { width: 100%; }
@@ -445,7 +494,7 @@ ol.steps li { margin-bottom: var(--s-3); line-height: 1.65; color: var(--ink-sof
 .mastheadLink:hover,
 .mastheadLink:focus-visible {
   background: rgba(255, 255, 255, 0.14);
-  color: #FFFFFF;
+  color: var(--white);
 }
 
 @media (max-width: 479px) {

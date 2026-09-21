@@ -64,7 +64,7 @@ page_head($ref !== null ? 'We have your job' : 'Post a job', 'post/',
      we introduce somebody. That way your phone does not start ringing at seven in the morning.</p>
 
   <div class="actions">
-    <a class="btn btnPrimary" href="<?= e(app_url('')) ?>">Browse the directory meanwhile</a>
+    <a class="btn btnPrimary" href="<?= e(app_url('directory/')) ?>">Browse the directory meanwhile</a>
   </div>
 
 <?php else: ?>
