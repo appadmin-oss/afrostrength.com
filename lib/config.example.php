@@ -19,9 +19,11 @@ return [
     ],
 
     'site' => [
-        'url' => 'https://contractors.afrostrength.com',
-        // Empty when it has its own subdomain. Set it only if the whole
-        // thing goes in a subfolder.
+        // The main site. Not a subdomain: this IS afrostrength.com, and the
+        // academy is the subdomain beside it at afrotech.afrostrength.com.
+        'url' => 'https://afrostrength.com',
+        // Empty, because this sits at the document root. Set it only if the
+        // whole thing is ever moved into a subfolder.
         'base_path' => '',
         'phone' => '+234 810 019 1456',
         'phone_href' => 'tel:+2348100191456',

@@ -1,26 +1,28 @@
-# Afrostrength contractors
+# afrostrength.com
 
-A checked contractor directory and job board for Afrostrength Limited, Lagos.
+The main Afrostrength site — **afrostrength.com** — a checked contractor
+directory and job board for Afrostrength Limited, Lagos.
 
 PHP 8.1+, MariaDB, no Node at runtime. Built to run on cPanel shared hosting
 without SSH, like the academy.
 
-## Why this is its own repository
+## Why it keeps its own database
 
-It is a different product from Afrotech Academy, and the separation is
-deliberate rather than tidy-minded.
+It sits on the main domain and the academy sits on a subdomain beside it, but
+they do not share a database, and that separation is a legal one rather than
+a tidy-minded one.
 
 A learner and a contractor are **different data subjects held on different
 lawful bases**: a learner's record exists to teach them, a contractor's to put
 them in front of paying clients. Under the Nigeria Data Protection Act 2023,
-merging the two databases would mean one consent had to cover both purposes,
-which it does not. It also means a bug in a job board cannot read somebody's
-marks.
+merging the two would mean one consent had to cover both purposes, which it
+does not. It also means a bug in a job board cannot read somebody's marks.
 
-So: its own schema, its own staff accounts, its own deployment. The shared
+So: its own schema, its own staff accounts, its own migrations. The shared
 libraries (`bootstrap`, `db`, `guards`, `assets`, `ui`, `money`, `migrate`)
-are **copied** from the academy rather than imported, because a shared
-dependency between two products on two hosts is a coupling neither wants.
+are **copied** from the academy rather than imported — the two are deployed
+and upgraded separately, and a shared dependency between them is a coupling
+neither wants.
 
 ## The two rules the product rests on
 
@@ -60,12 +62,31 @@ public/           the document root
 var/              logs and rate-limit state. Deny-all.
 ```
 
+## Where it goes
+
+**This is afrostrength.com itself** — the main site, at the document root. Not
+a subdomain. The academy is the subdomain beside it, and on a cPanel account
+the two sit next to each other:
+
+```
+public_html/                  <- THIS. public/ contents go in here.
+contractors-app/              <- lib/, migrations/, var/ — beside public_html,
+                                 never inside it
+afrotech.afrostrength.com/    <- the academy's subdomain folder
+afrotech-reg/                 <- the academy's application
+```
+
+`lib/` holds `config.php`, which holds the database password. Anything in
+`public_html` is one misconfigured `AddType` away from being served as text,
+so the application lives outside it and `var/` carries a deny-all besides.
+
 ## Installing
 
-1. Upload `lib/`, `migrations/` and `var/` **above** the web root; `public/`
-   contents into it.
+1. Upload `lib/`, `migrations/` and `var/` **above** the web root, beside
+   `public_html`; the contents of `public/` into `public_html` itself.
 2. Create a database and a user. Copy `lib/config.example.php` to
-   `lib/config.php`, fill it in, `chmod 600`.
+   `lib/config.php`, fill it in, `chmod 600`. It needs its OWN database — see
+   above for why a learner and a contractor are not kept together.
 3. Open `/_ops.php?token=YOUR_OPS_TOKEN`. Run the migrations. Create the first
    administrator — the password is shown once and is never emailed.
 4. Sign in at `/console/signin.php`.
