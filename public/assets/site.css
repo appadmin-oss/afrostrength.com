@@ -69,6 +69,17 @@
 .dropdown[open] .dropdownSummary svg { transform: rotate(180deg); }
 .dropdownSummary svg { transition: transform 150ms ease; }
 
+/*
+ * Hidden when shut, explicitly.
+ *
+ * <details> hides its own content, but an absolutely positioned child escapes
+ * that — so the panel stayed rendered and keyboard-focusable with the menu
+ * closed, putting four links in the tab order that nobody could see. Caught by
+ * tabbing through the page in a real browser; it is invisible to reading the
+ * markup, because the markup is correct.
+ */
+.dropdown:not([open]) .dropdownPanel { display: none; }
+
 .dropdownPanel {
   position: absolute; top: 44px; left: -16px;
   /* 340px is the handoff's, clamped so it cannot push the page sideways at
@@ -99,6 +110,9 @@
   font-size: 15px; font-weight: 600;
 }
 .btnMenu::-webkit-details-marker { display: none; }
+
+/* Same reason as the dropdown: position:fixed escapes <details>'s hiding. */
+.drawer:not([open]) .drawerScrim { display: none; }
 
 .drawerScrim {
   position: fixed; inset: 0; z-index: 200;
@@ -483,7 +497,7 @@
 .briefCard { background: var(--cream); border: 1px solid var(--border); border-radius: 18px; padding: clamp(var(--s-6), 4vw, var(--s-12)); }
 .briefForm { margin: 0; }
 .briefRow { display: flex; flex-wrap: wrap; gap: var(--s-3); }
-.briefRow .field { flex: 1 1 280px; }
+.briefRow .input { flex: 1 1 280px; }
 .briefExamples { list-style: none; margin: var(--s-5) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s-2); }
 .chip {
   min-height: 44px; padding: 0 var(--s-4);
@@ -515,23 +529,23 @@
 .wizRef { font-family: var(--font-mono); font-size: var(--t-body); color: var(--muted); }
 
 /* ══ Form controls ════════════════════════════════════════════════════════ */
-.fieldLabel { display: block; margin: 0 0 var(--s-2); font-size: 15px; font-weight: 600; }
-.fieldLabelSpaced { margin-top: var(--s-5); }
-.fieldOptional { font-weight: 400; color: var(--muted); }
-.field {
+.inputLabel { display: block; margin: 0 0 var(--s-2); font-size: 15px; font-weight: 600; }
+.inputLabelSpaced { margin-top: var(--s-5); }
+.inputOptional { font-weight: 400; color: var(--muted); }
+.input {
   width: 100%; min-height: 52px; padding: 14px var(--s-4);
   background: var(--page); border: 1px solid var(--border); border-radius: 12px;
   /* 16px, so iOS does not zoom the page when this takes focus. */
   font: var(--t-read)/1.5 var(--font-body); color: var(--ink);
 }
-.field:focus { outline: 2px solid var(--accent-deep); outline-offset: 1px; border-color: var(--accent-deep); }
-.fieldArea { min-height: 120px; resize: vertical; }
-.fieldBad { border-color: var(--danger); border-width: 2px; }
-.fieldError { margin: var(--s-2) 0 0; font-size: var(--t-body); font-weight: 500; color: var(--danger); }
-.fieldGood { margin: var(--s-2) 0 0; font-size: var(--t-body); font-weight: 500; color: var(--success); }
+.input:focus { outline: 2px solid var(--accent-deep); outline-offset: 1px; border-color: var(--accent-deep); }
+.inputArea { min-height: 120px; resize: vertical; }
+.inputBad { border-color: var(--danger); border-width: 2px; }
+.inputError { margin: var(--s-2) 0 0; font-size: var(--t-body); font-weight: 500; color: var(--danger); }
+.inputGood { margin: var(--s-2) 0 0; font-size: var(--t-body); font-weight: 500; color: var(--success); }
 .formAlert { margin: 0 0 var(--s-5); padding: 14px var(--s-4); border-radius: 12px; background: oklch(0.96 0.03 30); border: 1px solid var(--danger); color: var(--ink); font-size: 15px; }
 
-.fieldSet { border: 0; margin: 0; padding: 0; display: grid; gap: var(--s-3); }
+.inputSet { border: 0; margin: 0; padding: 0; display: grid; gap: var(--s-3); }
 .option { display: flex; align-items: center; gap: var(--s-3); min-height: 56px; padding: 0 var(--s-4); border: 1px solid var(--border); border-radius: 12px; cursor: pointer; font-size: 15px; }
 .option:hover { border-color: var(--ink); }
 .optionOn { border-color: var(--accent-deep); background: oklch(0.98 0.012 40); }
@@ -560,3 +574,9 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ── The directory's reading column ───────────────────────────────────────
+   The four directory pages are written for a narrow measure, not the
+   homepage's full-width sections. They keep it inside the shared chrome.   */
+.wrap { max-width: 860px; margin: 0 auto; padding: var(--s-16) var(--s-6) var(--s-20); }
+.fine { margin: var(--s-12) 0 0; font-size: var(--t-body); line-height: 1.6; color: var(--muted); }

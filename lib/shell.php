@@ -1,77 +1,52 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/assets.php';
+require_once __DIR__ . '/site-shell.php';
 require_once __DIR__ . '/directory.php';
 
-/** The public chrome. Afrostrength's, not the academy's. */
+/**
+ * The contractor directory's chrome — which is now the site's chrome.
+ *
+ * This used to render a masthead of its own that said "Afrostrength
+ * contractors", from when the directory was going to be its own site on its
+ * own subdomain. It is a feature of afrostrength.com, so a visitor moving
+ * from the homepage to the directory should not feel the header change under
+ * them, lose the navigation back, or wonder whether they have left.
+ *
+ * So page_head() and page_foot() stay — six pages call them and there was no
+ * reason to touch six files — but they are a thin shim over the studio site's
+ * header and footer, plus the narrow reading column those pages are written
+ * for. One header, one footer, one site.
+ */
 function page_head(string $title, string $current = '', ?string $description = null): void
 {
-    ?>
-<!DOCTYPE html>
-<html lang="en-NG">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2D2620">
-<title><?= e($title) ?> — Afrostrength contractors</title>
-<?php if ($description !== null): ?>
-<meta name="description" content="<?= e($description) ?>">
-<?php endif; ?>
-<link rel="preload" href="<?= e(asset('assets/fonts/archivo.woff2')) ?>" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="<?= e(asset('assets/fonts/fonts.css')) ?>">
-<link rel="stylesheet" href="<?= e(asset('assets/base.css')) ?>">
-<link rel="stylesheet" href="<?= e(asset('assets/site.css')) ?>">
-</head>
-<body>
-<a href="#main" class="skipLink">Skip to content</a>
-
-<header class="masthead">
-  <div class="mastheadRow">
-    <a class="mastheadBrand" href="<?= e(app_url('')) ?>">
-      <span class="mark" aria-hidden="true">AS</span>
-      <span>
-        <span class="wordmark">Afrostrength</span>
-        <span class="parent">Contractors</span>
-      </span>
-    </a>
-    <nav class="mastheadNav" aria-label="Afrostrength contractors">
-      <?php foreach ([
-          '' => 'Find someone',
-          'post/' => 'Post a job',
-          'work/' => 'Find work',
-          'join/' => 'Join',
-      ] as $href => $label):
-        $on = $current === $href; ?>
-        <a class="mastheadLink<?= $on ? ' mastheadOn' : '' ?>" href="<?= e(app_url($href)) ?>"
-           <?= $on ? 'aria-current="page"' : '' ?>><?= e($label) ?></a>
-      <?php endforeach; ?>
-    </nav>
-  </div>
-</header>
-
-<main id="main" class="wrap">
-<?php }
+    /*
+     * Everything under this shim is part of the directory, so the Directory
+     * nav item is the one that says "you are here" — whichever of the four
+     * pages is being read. The old per-page keys ('join/', 'post/', 'work/')
+     * are accepted and collapsed rather than made into four nav items the
+     * design does not have.
+     */
+    site_head($title . ' — Afrostrength', 'directory', $description);
+    echo '<div class="wrap">';
+}
 
 function page_foot(): void
 {
-    $phone = (string)cfg('site.phone', '+234 810 019 1456');
-    $phoneHref = (string)cfg('site.phone_href', 'tel:+2348100191456');
+    /*
+     * The two sentences the directory has to keep saying. They are the
+     * product's terms in plain words — what the fee is for, and that nobody's
+     * money passes through Afrostrength — and they belong near the directory
+     * rather than in the studio footer, where they would be a non-sequitur on
+     * a page about brand strategy.
+     */
     ?>
-</main>
-
-<footer class="siteFoot">
-  <p>
-    Afrostrength Limited ·
-    <a href="<?= e($phoneHref) ?>"><?= e($phone) ?></a> ·
-    <a href="<?= e(app_url('privacy.php')) ?>">How we handle your data</a>
-  </p>
   <p class="fine">
     Afrostrength checks every listing before it appears, and charges a fee when it introduces a
     contractor to a client. It does not hold anyone's money: a client pays their contractor
     directly.
   </p>
-</footer>
-</body>
-</html>
-<?php }
+</div>
+<?php
+    site_foot();
+}

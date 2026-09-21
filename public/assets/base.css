@@ -47,6 +47,27 @@
    * The one gradient on the site. The handoff is explicit that there is
    * exactly one and that no others are to be added, so it lives here as a
    * token rather than being retyped at each of the five places it appears.
+   *
+   * ── KNOWN CONTRAST GAP, measured, not guessed ─────────────────────────
+   *
+   * White text on this gradient does not clear WCAG AA everywhere:
+   *
+   *     white on --accent      (the start)  3.23:1
+   *     white on --accent-deep (the end)    5.94:1
+   *
+   * AA wants 4.5:1 for normal text and 3.0:1 for large. So on the light end:
+   *
+   *   PASSES  .workCoverName  26px/700  and  .h2OnDark 37px/700  (large, 3.0)
+   *   FAILS   .btnGrad        16px/600  — the primary call to action
+   *   FAILS   .workKicker     11px/400  — the kicker on the first work card
+   *
+   * It is left as the design specifies rather than quietly corrected: making
+   * white clear 4.5 across the sweep needs --accent to drop from L 0.673 to
+   * about 0.583 — #F0552A to roughly #DA3700 — which is a different brand
+   * orange, not a tweak, and that is the client's decision to make.
+   *
+   * Recorded here so it cannot be lost. It is a real gap, and somebody has
+   * to choose between the brand colour and the contrast ratio.
    */
   --grad: linear-gradient(135deg, var(--accent), var(--accent-deep));
 
@@ -156,20 +177,6 @@ h1, h2, h3, legend, .wordmark, .progressNum, .refValue {
   border: 0;
 }
 
-/* ---- Chrome ------------------------------------------------------------ */
-
-.masthead {
-  background: var(--ink);
-  color: var(--white);
-  padding: var(--s-4) var(--s-5);
-}
-.mastheadRow {
-  max-width: 720px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-}
 .mark {
   flex: 0 0 auto;
   width: 36px; height: 36px;
@@ -185,13 +192,7 @@ h1, h2, h3, legend, .wordmark, .progressNum, .refValue {
   color: var(--white);
 }
 .wordmark { font-size: var(--t-lead); font-weight: 700; letter-spacing: -0.01em; }
-.parent { display: block; font-size: var(--t-small); color: var(--on-dark); }
 
-.wrap {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: var(--s-8) var(--s-5) var(--s-16);
-}
 
 h1 {
   margin: 0 0 var(--s-3);
@@ -387,16 +388,20 @@ input:focus, select:focus { border-color: var(--red-deep); }
   padding: 0 var(--s-8);
   font-size: var(--t-read);
   font-family: inherit;
-  font-weight: 700;
-  border-radius: 999px;
+  font-weight: 600;
+  /* 12px, matching the homepage's CTAs. These were 999px pills from the
+     academy's stylesheet, and a page whose buttons are a different shape from
+     the one before it does not read as the same site. */
+  border-radius: 12px;
   border: 1px solid transparent;
   cursor: pointer;
   text-decoration: none;
 }
-.btnPrimary { background: var(--red-deep); color: var(--white); }
-.btnPrimary:hover { background: var(--accent-deep); }
+/* The primary action uses the site's one gradient, as the homepage does. */
+.btnPrimary { background: var(--grad); color: var(--white); }
+.btnPrimary:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .btnSecondary { background: var(--page); border-color: var(--border); color: var(--ink); }
-.btnSecondary:hover { border-color: var(--ink-soft); }
+.btnSecondary:hover { border-color: var(--ink); }
 .btnBlock { width: 100%; }
 
 .actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-6); }
@@ -444,63 +449,9 @@ ol.steps li { margin-bottom: var(--s-3); line-height: 1.65; color: var(--ink-sof
   .actions .btn { width: 100%; }
 }
 
-/* ---- Masthead navigation -------------------------------------------------
- *
- * Added because the masthead had none. A visitor on the registration desk had
- * no way to the help centre and a learner had no way back into their portal —
- * both existed, and nothing on the page said so.
- *
- * Two links, always visible. No menu: there is nothing here worth hiding.
- */
 
-.mastheadRow {
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
 
-.mastheadBrand {
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-  color: inherit;
-  text-decoration: none;
-  min-height: 44px;
-}
 
-.mastheadBrand:hover .wordmark {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
 
-.mastheadNav {
-  display: flex;
-  align-items: center;
-  gap: var(--s-1);
-}
 
-.mastheadLink {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 var(--s-4);
-  border-radius: 8px;
-  color: rgba(255, 255, 255, 0.86);
-  font-size: var(--t-body);
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-}
 
-.mastheadLink:hover,
-.mastheadLink:focus-visible {
-  background: rgba(255, 255, 255, 0.14);
-  color: var(--white);
-}
-
-@media (max-width: 479px) {
-  .parent {
-    /* The sub-line goes before the links do: knowing where to click beats
-       knowing who owns the programme, and the footer says so anyway. */
-    display: none;
-  }
-}

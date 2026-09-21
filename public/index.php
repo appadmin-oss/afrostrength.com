@@ -638,7 +638,7 @@ site_head(
 
         <label class="srOnly" for="briefProblem">Describe the problem</label>
         <div class="briefRow">
-          <input class="field<?= isset($wiz['errors']['problem']) ? ' fieldBad' : '' ?>"
+          <input class="input<?= isset($wiz['errors']['problem']) ? ' inputBad' : '' ?>"
                  id="briefProblem" name="problem" type="text"
                  placeholder="Describe the problem"
                  value="<?= e((string)$wiz['problem']) ?>"
@@ -647,9 +647,9 @@ site_head(
         </div>
 
         <?php if (isset($wiz['errors']['problem'])): ?>
-          <p class="fieldError" id="briefErr"><?= e($wiz['errors']['problem']) ?></p>
+          <p class="inputError" id="briefErr"><?= e($wiz['errors']['problem']) ?></p>
         <?php elseif (!empty($wiz['carried'])): ?>
-          <p class="fieldGood">Carried into the enquiry below. Two answers left.</p>
+          <p class="inputGood">Carried into the enquiry below. Two answers left.</p>
         <?php endif; ?>
 
         <?php /* Examples that fill the box, so nobody has to start on a blank one. */ ?>
@@ -713,17 +713,17 @@ site_head(
           <p class="wizLabel">Step <?= (int)$wiz['step'] ?> of 3</p>
 
           <?php if ((int)$wiz['step'] === 1): ?>
-            <label class="fieldLabel" for="wizProblem">What needs to change?</label>
-            <textarea class="field fieldArea<?= isset($wiz['errors']['problem']) ? ' fieldBad' : '' ?>"
+            <label class="inputLabel" for="wizProblem">What needs to change?</label>
+            <textarea class="input inputArea<?= isset($wiz['errors']['problem']) ? ' inputBad' : '' ?>"
                       id="wizProblem" name="problem" rows="4" required
                       <?= isset($wiz['errors']['problem']) ? 'aria-invalid="true" aria-describedby="wizProblemErr"' : '' ?>><?= e((string)$wiz['problem']) ?></textarea>
             <?php if (isset($wiz['errors']['problem'])): ?>
-              <p class="fieldError" id="wizProblemErr"><?= e($wiz['errors']['problem']) ?></p>
+              <p class="inputError" id="wizProblemErr"><?= e($wiz['errors']['problem']) ?></p>
             <?php endif; ?>
 
           <?php elseif ((int)$wiz['step'] === 2): ?>
-            <fieldset class="fieldSet">
-              <legend class="fieldLabel">What kind of help is that?</legend>
+            <fieldset class="inputSet">
+              <legend class="inputLabel">What kind of help is that?</legend>
               <?php foreach (ENQUIRY_KINDS as $key => $label): ?>
                 <label class="option<?= (string)$wiz['kind'] === $key ? ' optionOn' : '' ?>">
                   <input type="radio" name="kind" value="<?= e($key) ?>" <?= (string)$wiz['kind'] === $key ? 'checked' : '' ?>>
@@ -733,17 +733,17 @@ site_head(
             </fieldset>
 
           <?php else: ?>
-            <label class="fieldLabel" for="wizEmail">Where should we reply?</label>
-            <input class="field<?= isset($wiz['errors']['email']) ? ' fieldBad' : '' ?>"
+            <label class="inputLabel" for="wizEmail">Where should we reply?</label>
+            <input class="input<?= isset($wiz['errors']['email']) ? ' inputBad' : '' ?>"
                    id="wizEmail" name="email" type="email" required autocomplete="email"
                    value="<?= e((string)$wiz['email']) ?>"
                    <?= isset($wiz['errors']['email']) ? 'aria-invalid="true" aria-describedby="wizEmailErr"' : '' ?>>
             <?php if (isset($wiz['errors']['email'])): ?>
-              <p class="fieldError" id="wizEmailErr"><?= e($wiz['errors']['email']) ?></p>
+              <p class="inputError" id="wizEmailErr"><?= e($wiz['errors']['email']) ?></p>
             <?php endif; ?>
 
-            <label class="fieldLabel fieldLabelSpaced" for="wizName">Your name <span class="fieldOptional">— optional</span></label>
-            <input class="field" id="wizName" name="name" type="text" autocomplete="name"
+            <label class="inputLabel fieldLabelSpaced" for="wizName">Your name <span class="inputOptional">— optional</span></label>
+            <input class="input" id="wizName" name="name" type="text" autocomplete="name"
                    value="<?= e((string)$wiz['name']) ?>">
 
             <label class="consent">
@@ -751,7 +751,7 @@ site_head(
               <span>You may keep my details to reply to this enquiry.</span>
             </label>
             <?php if (isset($wiz['errors']['consent'])): ?>
-              <p class="fieldError"><?= e($wiz['errors']['consent']) ?></p>
+              <p class="inputError"><?= e($wiz['errors']['consent']) ?></p>
             <?php endif; ?>
           <?php endif; ?>
 
